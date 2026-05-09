@@ -9,38 +9,154 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as JobsRouteImport } from './routes/jobs'
+import { Route as CompaniesRouteImport } from './routes/companies'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as JobsIdRouteImport } from './routes/jobs.$id'
+import { Route as DashboardStudentRouteImport } from './routes/dashboard.student'
+import { Route as DashboardCompanyRouteImport } from './routes/dashboard.company'
+import { Route as DashboardJobsIdApplicantsRouteImport } from './routes/dashboard.jobs.$id.applicants'
 
+const JobsRoute = JobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompaniesRoute = CompaniesRouteImport.update({
+  id: '/companies',
+  path: '/companies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JobsIdRoute = JobsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => JobsRoute,
+} as any)
+const DashboardStudentRoute = DashboardStudentRouteImport.update({
+  id: '/dashboard/student',
+  path: '/dashboard/student',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardCompanyRoute = DashboardCompanyRouteImport.update({
+  id: '/dashboard/company',
+  path: '/dashboard/company',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardJobsIdApplicantsRoute =
+  DashboardJobsIdApplicantsRouteImport.update({
+    id: '/dashboard/jobs/$id/applicants',
+    path: '/dashboard/jobs/$id/applicants',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/companies': typeof CompaniesRoute
+  '/jobs': typeof JobsRouteWithChildren
+  '/dashboard/company': typeof DashboardCompanyRoute
+  '/dashboard/student': typeof DashboardStudentRoute
+  '/jobs/$id': typeof JobsIdRoute
+  '/dashboard/jobs/$id/applicants': typeof DashboardJobsIdApplicantsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/companies': typeof CompaniesRoute
+  '/jobs': typeof JobsRouteWithChildren
+  '/dashboard/company': typeof DashboardCompanyRoute
+  '/dashboard/student': typeof DashboardStudentRoute
+  '/jobs/$id': typeof JobsIdRoute
+  '/dashboard/jobs/$id/applicants': typeof DashboardJobsIdApplicantsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/companies': typeof CompaniesRoute
+  '/jobs': typeof JobsRouteWithChildren
+  '/dashboard/company': typeof DashboardCompanyRoute
+  '/dashboard/student': typeof DashboardStudentRoute
+  '/jobs/$id': typeof JobsIdRoute
+  '/dashboard/jobs/$id/applicants': typeof DashboardJobsIdApplicantsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/companies'
+    | '/jobs'
+    | '/dashboard/company'
+    | '/dashboard/student'
+    | '/jobs/$id'
+    | '/dashboard/jobs/$id/applicants'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/companies'
+    | '/jobs'
+    | '/dashboard/company'
+    | '/dashboard/student'
+    | '/jobs/$id'
+    | '/dashboard/jobs/$id/applicants'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/companies'
+    | '/jobs'
+    | '/dashboard/company'
+    | '/dashboard/student'
+    | '/jobs/$id'
+    | '/dashboard/jobs/$id/applicants'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
+  CompaniesRoute: typeof CompaniesRoute
+  JobsRoute: typeof JobsRouteWithChildren
+  DashboardCompanyRoute: typeof DashboardCompanyRoute
+  DashboardStudentRoute: typeof DashboardStudentRoute
+  DashboardJobsIdApplicantsRoute: typeof DashboardJobsIdApplicantsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/jobs': {
+      id: '/jobs'
+      path: '/jobs'
+      fullPath: '/jobs'
+      preLoaderRoute: typeof JobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/companies': {
+      id: '/companies'
+      path: '/companies'
+      fullPath: '/companies'
+      preLoaderRoute: typeof CompaniesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +164,56 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/jobs/$id': {
+      id: '/jobs/$id'
+      path: '/$id'
+      fullPath: '/jobs/$id'
+      preLoaderRoute: typeof JobsIdRouteImport
+      parentRoute: typeof JobsRoute
+    }
+    '/dashboard/student': {
+      id: '/dashboard/student'
+      path: '/dashboard/student'
+      fullPath: '/dashboard/student'
+      preLoaderRoute: typeof DashboardStudentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/company': {
+      id: '/dashboard/company'
+      path: '/dashboard/company'
+      fullPath: '/dashboard/company'
+      preLoaderRoute: typeof DashboardCompanyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/jobs/$id/applicants': {
+      id: '/dashboard/jobs/$id/applicants'
+      path: '/dashboard/jobs/$id/applicants'
+      fullPath: '/dashboard/jobs/$id/applicants'
+      preLoaderRoute: typeof DashboardJobsIdApplicantsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface JobsRouteChildren {
+  JobsIdRoute: typeof JobsIdRoute
+}
+
+const JobsRouteChildren: JobsRouteChildren = {
+  JobsIdRoute: JobsIdRoute,
+}
+
+const JobsRouteWithChildren = JobsRoute._addFileChildren(JobsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
+  CompaniesRoute: CompaniesRoute,
+  JobsRoute: JobsRouteWithChildren,
+  DashboardCompanyRoute: DashboardCompanyRoute,
+  DashboardStudentRoute: DashboardStudentRoute,
+  DashboardJobsIdApplicantsRoute: DashboardJobsIdApplicantsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

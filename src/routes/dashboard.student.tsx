@@ -1,16 +1,29 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
-import { Briefcase, Bookmark, FileText } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { Briefcase, Bookmark, FileText, Sparkles, CheckCircle2, Circle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { JobCard, type JobCardData } from "@/components/job-card";
 
 export const Route = createFileRoute("/dashboard/student")({
   component: StudentDashboard,
 });
+
+const PROFILE_FIELDS: { key: string; label: string }[] = [
+  { key: "full_name", label: "Add your full name" },
+  { key: "headline", label: "Write a short headline" },
+  { key: "bio", label: "Add a bio" },
+  { key: "location", label: "Set your location" },
+  { key: "avatar_url", label: "Upload a profile photo" },
+  { key: "resume_url", label: "Upload your resume" },
+  { key: "skills", label: "List your skills" },
+  { key: "education", label: "Add education details" },
+];
 
 function StudentDashboard() {
   const { user, role, loading } = useAuth();
@@ -48,6 +61,63 @@ function StudentDashboard() {
     },
   });
 
+  const { data: profile } = useQuery({
+    queryKey: ["my-profile", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user!.id)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  const profileChecks = useMemo(() => {
+    return PROFILE_FIELDS.map((f) => {
+      const v = (profile as any)?.[f.key];
+      const done = Array.isArray(v)
+        ? v.length > 0
+        : typeof v === "object" && v !== null
+          ? Object.keys(v).length > 0
+          : Boolean(v && String(v).trim());
+      return { ...f, done };
+    });
+  }, [profile]);
+
+  const completionPct = Math.round(
+    (profileChecks.filter((c) => c.done).length / profileChecks.length) * 100,
+  );
+
+  const appliedJobIds = useMemo(
+    () => new Set(applications.map((a: any) => a.jobs?.id).filter(Boolean)),
+    [applications],
+  );
+
+  const { data: recommended = [] } = useQuery({
+    queryKey: ["recommended-jobs", user?.id, profile?.skills],
+    enabled: !!user,
+    queryFn: async (): Promise<JobCardData[]> => {
+      const skills = (profile?.skills as string[] | null) ?? [];
+      let query = supabase
+        .from("jobs")
+        .select(
+          "id, title, type, work_mode, location, salary_min, salary_max, currency, skills, created_at, companies(name, logo_url, verified)",
+        )
+        .eq("is_active", true)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (skills.length > 0) query = query.overlaps("skills", skills);
+      const { data } = await query;
+      return (data as any) ?? [];
+    },
+  });
+
+  const recommendedFiltered = recommended
+    .filter((j) => !appliedJobIds.has(j.id))
+    .slice(0, 4);
+
   if (!user) return null;
 
   return (
@@ -62,6 +132,70 @@ function StudentDashboard() {
           <Stat icon={<Bookmark />} label="Saved jobs" value={saved.length} />
           <Stat icon={<FileText />} label="Interviews" value={applications.filter((a: any) => a.status === "interview").length} />
         </div>
+
+        <section className="mt-6 rounded-2xl border bg-card p-6 shadow-soft">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-base font-semibold">Profile completion</h2>
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                A complete profile gets up to 5× more views from recruiters.
+              </p>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-semibold">{completionPct}%</div>
+              <div className="text-xs text-muted-foreground">
+                {profileChecks.filter((c) => c.done).length} of {profileChecks.length} complete
+              </div>
+            </div>
+          </div>
+          <Progress value={completionPct} className="mt-4" />
+          <ul className="mt-5 grid gap-2 sm:grid-cols-2">
+            {profileChecks.map((c) => (
+              <li
+                key={c.key}
+                className="flex items-center gap-2 text-sm"
+              >
+                {c.done ? (
+                  <CheckCircle2 className="h-4 w-4 text-success" />
+                ) : (
+                  <Circle className="h-4 w-4 text-muted-foreground" />
+                )}
+                <span className={c.done ? "text-muted-foreground line-through" : ""}>
+                  {c.label}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="mt-6 rounded-2xl border bg-card p-6 shadow-soft">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <h2 className="text-base font-semibold">Recommended for you</h2>
+            </div>
+            <Link to="/jobs" className="text-sm text-primary hover:underline">
+              See all →
+            </Link>
+          </div>
+          {recommendedFiltered.length === 0 ? (
+            <Empty
+              text={
+                (profile?.skills as string[] | null)?.length
+                  ? "No new matches right now — check back soon."
+                  : "Add skills to your profile to unlock personalized recommendations."
+              }
+              cta="Browse all jobs"
+              to="/jobs"
+            />
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {recommendedFiltered.map((j) => (
+                <JobCard key={j.id} job={j} />
+              ))}
+            </div>
+          )}
+        </section>
 
         <Card title="My applications">
           {applications.length === 0 ? (

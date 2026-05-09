@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as CompaniesRouteImport } from './routes/companies'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -18,6 +19,11 @@ import { Route as DashboardStudentRouteImport } from './routes/dashboard.student
 import { Route as DashboardCompanyRouteImport } from './routes/dashboard.company'
 import { Route as DashboardJobsIdApplicantsRouteImport } from './routes/dashboard.jobs.$id.applicants'
 
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const JobsRoute = JobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/companies': typeof CompaniesRoute
   '/jobs': typeof JobsRouteWithChildren
+  '/profile': typeof ProfileRoute
   '/dashboard/company': typeof DashboardCompanyRoute
   '/dashboard/student': typeof DashboardStudentRoute
   '/jobs/$id': typeof JobsIdRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/companies': typeof CompaniesRoute
   '/jobs': typeof JobsRouteWithChildren
+  '/profile': typeof ProfileRoute
   '/dashboard/company': typeof DashboardCompanyRoute
   '/dashboard/student': typeof DashboardStudentRoute
   '/jobs/$id': typeof JobsIdRoute
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/companies': typeof CompaniesRoute
   '/jobs': typeof JobsRouteWithChildren
+  '/profile': typeof ProfileRoute
   '/dashboard/company': typeof DashboardCompanyRoute
   '/dashboard/student': typeof DashboardStudentRoute
   '/jobs/$id': typeof JobsIdRoute
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/companies'
     | '/jobs'
+    | '/profile'
     | '/dashboard/company'
     | '/dashboard/student'
     | '/jobs/$id'
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/companies'
     | '/jobs'
+    | '/profile'
     | '/dashboard/company'
     | '/dashboard/student'
     | '/jobs/$id'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/companies'
     | '/jobs'
+    | '/profile'
     | '/dashboard/company'
     | '/dashboard/student'
     | '/jobs/$id'
@@ -129,6 +141,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CompaniesRoute: typeof CompaniesRoute
   JobsRoute: typeof JobsRouteWithChildren
+  ProfileRoute: typeof ProfileRoute
   DashboardCompanyRoute: typeof DashboardCompanyRoute
   DashboardStudentRoute: typeof DashboardStudentRoute
   DashboardJobsIdApplicantsRoute: typeof DashboardJobsIdApplicantsRoute
@@ -136,6 +149,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/jobs': {
       id: '/jobs'
       path: '/jobs'
@@ -210,6 +230,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CompaniesRoute: CompaniesRoute,
   JobsRoute: JobsRouteWithChildren,
+  ProfileRoute: ProfileRoute,
   DashboardCompanyRoute: DashboardCompanyRoute,
   DashboardStudentRoute: DashboardStudentRoute,
   DashboardJobsIdApplicantsRoute: DashboardJobsIdApplicantsRoute,
@@ -217,3 +238,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

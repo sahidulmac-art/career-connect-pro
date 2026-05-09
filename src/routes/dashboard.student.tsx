@@ -151,18 +151,33 @@ function StudentDashboard() {
           <Progress value={completionPct} className="mt-4" />
           <ul className="mt-5 grid gap-2 sm:grid-cols-2">
             {profileChecks.map((c) => (
-              <li
-                key={c.key}
-                className="flex items-center gap-2 text-sm"
-              >
-                {c.done ? (
-                  <CheckCircle2 className="h-4 w-4 text-success" />
-                ) : (
-                  <Circle className="h-4 w-4 text-muted-foreground" />
-                )}
-                <span className={c.done ? "text-muted-foreground line-through" : ""}>
-                  {c.label}
-                </span>
+              <li key={c.key}>
+                <Link
+                  to="/profile"
+                  hash={c.key}
+                  className="group flex items-center gap-2 rounded-md px-2 py-1.5 -mx-2 text-sm transition-colors hover:bg-muted"
+                >
+                  {c.done ? (
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
+                  ) : (
+                    <Circle className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  )}
+                  <span
+                    className={
+                      c.done
+                        ? "text-muted-foreground line-through group-hover:text-foreground"
+                        : "group-hover:text-primary"
+                    }
+                  >
+                    {c.label}
+                  </span>
+                  <span
+                    aria-hidden
+                    className="ml-auto text-xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+                  >
+                    {c.done ? "Edit →" : "Add →"}
+                  </span>
+                </Link>
               </li>
             ))}
           </ul>

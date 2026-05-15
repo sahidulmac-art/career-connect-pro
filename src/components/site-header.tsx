@@ -22,10 +22,10 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b bg-surface/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-primary text-primary-foreground">
+          <div className="h-8 w-8 rounded-md bg-gradient-primary text-primary-foreground flex items-start justify-end">
             <Briefcase className="h-4 w-4" />
           </div>
-          <span className="text-lg font-semibold tracking-tight">Hireloop</span>
+          <span className="text-lg font-semibold tracking-tight">PLACEHIRE</span>
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
